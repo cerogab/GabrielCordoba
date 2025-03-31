@@ -1,0 +1,26 @@
+---
+title: "{{ replace .Name "-" " " | title }}"
+date: {{ .Date }}
+draft: true
+---
+
+.post-content h3 {
+    margin-bottom: 32px;
+}
+
+.post-content pre code {
+    padding: 20px !important;
+    background: rgb(245, 245, 245) !important;
+    color: black;
+}
+
+.highlight > pre {
+    background-color: var(--code-bg) !important;
+    border-radius: 8px;
+}
+---
+title: "Archives"
+layout: "archives"
+url: "/archives/"
+summary: archives
+---
