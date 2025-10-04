@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Chat Meeting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .video-container {
+            background-color: #222;
+            border-radius: 8px;
+            aspect-ratio: 16/9;
+            position: relative;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .control-btn {
+            padding: 10px 15px;
+            border-radius: 50px;
+            border: none;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .control-btn:hover {
+            background-color: #e0e0e0;
+        }
+        .control-btn.danger {
+            background-color: #ff4d4f;
+            color: white;
+        }
+        .control-btn.danger:hover {
+            background-color: #ff7875;
+        }
+        .chat {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            padding: 10px 15px;
+            background-color: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .participant-name {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .meeting-info {
+            margin-bottom: 20px;
+        }
+        .agenda {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Weekly Status Meeting</h1>
+            <div>
+                <span id="meeting-time">00:00:00</span>
+            </div>
+        </div>
+        
+        <div class="meeting-info">
+            <p><strong>Date:</strong> <span id="meeting-date"></span></p>
+            <p><strong>Meeting ID:</strong> <span id="meeting-id">123-456-789</span></p>
+        </div>
+        
+        <div class="video-grid">
+            <div class="video-container">
+                <div class="participant-name">You</div>
+            </div>
+            <div class="video-container">
+                <div class="participant-name">Participant 1</div>
+            </div>
+            <div class="video-container">
+                <div class="participant-name">Participant 2</div>
+            </div>
+            <div class="video-container">
+                <div class="participant-name">Participant 3</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn" id="mute-btn">
+                <span class="icon">🎤</span> Mute
+            </button>
+            <button class="control-btn" id="video-btn">
+                <span class="icon">📹</span> Stop Video
+            </button>
+            <button class="control-btn" id="share-btn">
+                <span class="icon">📊</span> Share Screen
+            </button>
+            <button class="control-btn" id="participants-btn">
+                <span class="icon">👥</span> Participants
+            </button>
+            <button class="control-btn" id="chat-toggle">
+                <span class="icon">💬</span> Chat
+            </button>
+            <button class="control-btn danger" id="end-btn">
+                End Meeting
+            </button>
+        </div>
+        
+        <div class="chat">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Chat messages will be inserted here -->
+                <p><strong>System:</strong> Welcome to the meeting!</p>
+            </div>
+            <div class="chat-input">
+                <input type="text" placeholder="Type a message..." id="message-input">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+        
+        <div class="agenda">
+            <h2>Meeting Agenda</h2>
+            <ol>
+                <li>Project progress updates (30 min)</li>
+                <li>Blockers and challenges (15 min)</li>
+                <li>Next steps and action items (15 min)</li>
+            </ol>
+            
+            <h3>Notes</h3>
+            <textarea rows="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Take notes here..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // Update meeting date
+        const today = new Date();
+        document.getElementById('meeting-date').textContent = today.toLocaleDateString();
+        
+        // Simple timer
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            document.getElementById('meeting-time').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+        
+        // Simple chat functionality
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+                input.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+        
+        // Enter key to send message
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('send-btn').click();
+            }
+        });
+        
+        // Toggle buttons
+        document.getElementById('mute-btn').addEventListener('click', function() {
+            this.innerHTML = this.innerHTML.includes('Mute') ? 
+                '<span class="icon">🔇</span> Unmute' : 
+                '<span class="icon">🎤</span> Mute';
+        });
+        
+        document.getElementById('video-btn').addEventListener('click', function() {
+            this.innerHTML = this.innerHTML.includes('Stop') ? 
+                '<span class="icon">📹</span> Start Video' : 
+                '<span class="icon">📹</span> Stop Video';
+        });
+    </script>
+</body>
+</html>
